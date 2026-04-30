@@ -92,7 +92,7 @@ class CapRelay(RelayController):
 
         print(f"CapRelay initialized with {len(relay_pins)} relays on pins {relay_pins}")
         print(f"  Charge configuration: {chg_config}")
-        print(f"  Dump configuration: {dmp_config}")
+        print(f"  !Dump configuration: {dmp_config}")
         
     def set_state(self, state_name: str) -> None:
         """
@@ -101,7 +101,7 @@ class CapRelay(RelayController):
 
         if state_name.lower() == "charge":
             config = self.chg_config
-        elif state_name.lower() == "dump":
+        elif state_name.lower() == "!dump":
             config = self.dmp_config
         elif state_name.lower() == "null":
             config = self.null_state

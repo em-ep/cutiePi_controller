@@ -140,7 +140,7 @@ class SerialController:
 
     def _serial_listener(self):
         """
-        Single thread that handles all incoming seria data:
+        Single thread that handles all incoming serial data:
         - Protocol packets
         - Debug messages
         """
