@@ -581,10 +581,10 @@ void __time_critical_func(on_pwm_wrap)() {
    // Finds nextState from target
    if (target < 100) { // Negative pulses
         nextState = negCycle;
-        delay = (100-target) * 5; // Delay in PIO cycles @ 25 MHz
+        delay = (target - 100) * 5; // Delay in PIO cycles @ 25 MHz
     } else { // Positive pulses
         nextState = possCycle;
-        delay = (target-99) * 5; // Delay in PIO cycles @ 25 MHz
+        delay = (target - 100) * 5; // Delay in PIO cycles @ 25 MHz
     }
 
     // Sets Lower bound on DCP (1 us + switching time)/20 us ~7.5%
@@ -626,13 +626,13 @@ void init_shot() {
     free2stop = 0;  // Turn all off
     freeCycle = ((S2 | S4) << 28) | ((S2 | S4) << 24) | ((S2 | S4) << 4) | (S2 | S4);
  
-    free2poss = ((S2 | S3) << 4) | S2;  // S2 only then S2 and S3
-    poss2free = ((S2 | S4) << 4) | S2;  // S2 only then S2 and S4
-    possCycle = (poss2free << 24) | free2poss;
+    free2neg = ((S2 | S3) << 4) | S2;  // S2 only then S2 and S3
+    neg2free = ((S2 | S4) << 4) | S2;  // S2 only then S2 and S4
+    negCycle = (poss2free << 24) | free2neg;
  
-    free2neg = ((S1 | S4) << 4) | S4;  // S4 only then S1 and S4
-    neg2free = ((S2 | S4) << 4) | S4;  // S4 only then S2 and S4
-    negCycle = (neg2free << 24) | free2neg;
+    free2poss = ((S1 | S4) << 4) | S4;  // S4 only then S1 and S4
+    poss2free = ((S2 | S4) << 4) | S4;  // S4 only then S2 and S4
+    possCycle = (neg2free << 24) | free2poss;
 
 
     // Choose PIO instance (0 or 1)
@@ -719,17 +719,21 @@ void run_shot(uint16_t pulseCycles) {
     for (uint16_t cycle = 0; cycle < pulseCycles; cycle++) {
         setpoint = pulse_buffer[cycle];
 
-        measurement = (((adc_read() * conversion_factor) * scale_factor)/2); // TODO: switch to rolling ADC implementation !! DO THIS SOON
-        adc_block[cycle] = measurement;
+        // PID Controller: Disabled as of V1.0
+        // measurement = (((adc_read() * conversion_factor) * scale_factor)/2); // TODO: switch to rolling ADC implementation !! DO THIS SOON
+        // adc_block[cycle] = measurement;
 
-        // PID Control
-        pid_controller_update(&pid, (float)setpoint, measurement);
+        // // PID Control
+        // pid_controller_update(&pid, (float)setpoint, measurement);
 
-        // Loads PID modulated waveform to return array
-        pid_block[cycle] = pid.out;
+        // // Loads PID modulated waveform to return array
+        // pid_block[cycle] = pid.out;
+
+        // sem_acquire_blocking(&pwm_sem);
+        // target = pid.out;
 
         sem_acquire_blocking(&pwm_sem);
-        target = pid.out;
+        target = setpoint;
     }
     
     // Shutdown PWM
