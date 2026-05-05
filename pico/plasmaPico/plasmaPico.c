@@ -688,7 +688,7 @@ void run_shot(uint16_t pulseCycles) {
 
     // Loads freewheeling as first PWM pulse
     delay = 250;
-    nextState = (stop2free << 24) | (( delay << 8) | free2stop);
+    nextState = (stop2free << 24) | ((delay << 8) | free2stop);
 
 
     // Set up PID
